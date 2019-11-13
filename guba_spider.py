@@ -42,7 +42,7 @@ for page in range(start_page,end_page):
         print('item_count: ')
         for item in article_list:
             try:
-                time.sleep(1)
+                time.sleep(0.1)
                 reads=item.find_all('span',class_='l1 a1')[0].get_text()
                 title=item.find_all('span',class_='l3 a3')[0].a['title']
                 href='http://guba.eastmoney.com'+item.find_all('span',class_='l3 a3')[0].a['href']
@@ -66,11 +66,11 @@ for page in range(start_page,end_page):
                 
                 #大部分历史数据不用计算哈希了，最近的可能爬到重复了的再计算
                 #record['id']=hash(user_name+title[:5])
-                record['href']=href
+                #record['href']=href
                 record['time']=time_stamp
                 record['read_count']=reads
                 record['user_id']=user_id
-                record['name']=user_name
+                #record['name']=user_name
                 record['star']=star
                 record['content']=title
 
