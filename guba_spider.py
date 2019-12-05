@@ -13,10 +13,8 @@ base_url = 'http://guba.eastmoney.com/list,zssh000001_{}.html'
 #遍历页码
 #全部信息
 records=[]
-#建议一次页数少爬一点
 
 #遍历页码
-#全部信息
 start_page=int(sys.argv[1])
 end_page=int(sys.argv[2])
 #就是'http://guba.eastmoney.com/list,zssh000001_{}.html' 里面zssh000001部分，可以用其他代替
@@ -44,10 +42,13 @@ for page in range(start_page,end_page):
             try:
                 time.sleep(0.1)
                 reads=item.find_all('span',class_='l1 a1')[0].get_text()
-                title=item.find_all('span',class_='l3 a3')[0].a['title']
+                #title=item.find_all('span',class_='l3 a3')[0].a['title']
                 href='http://guba.eastmoney.com'+item.find_all('span',class_='l3 a3')[0].a['href']
                 
                 detail=BeautifulSoup(requests.get(href).content, "lxml")
+
+                title=detail.find_all('div',id='zwconttbt')[0].get_text()
+
                 data=json.loads(detail.find_all(class_='data')[0]['data-json'])
 
                 user_id=data['user_id']
