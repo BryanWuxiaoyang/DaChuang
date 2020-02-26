@@ -5,24 +5,24 @@ import json
 import sys
 from datetime import datetime
 import time
+import numpy as np
 #usage: 三个参数 1：起始页面 2：终止页面 3：目标股吧id
 
 #上证指数股吧 其他股吧更改list，后面内容即可，最后大括号用于控制页数
 base_url = 'http://guba.eastmoney.com/list,zssh000001_{}.html'
 
-#遍历页码
-#全部信息
-records=[]
+stkcd=np.loads('stkcd.npy')
 
+
+records=[]
 #遍历页码
-start_page=int(sys.argv[1])
-end_page=int(sys.argv[2])
+start_page=1#int(sys.argv[1])
+end_page=2#int(sys.argv[2])
 #就是'http://guba.eastmoney.com/list,zssh000001_{}.html' 里面zssh000001部分，可以用其他代替
-try:
-    target=sys.argv[3]
-    base_url='http://guba.eastmoney.com/list,'+target+'_{}.html'
-except:
-    print('wrong target website or error')
+
+
+#target=sys.argv[3]
+base_url='http://guba.eastmoney.com/list,'+target+'_{}.html'
 
 records=[]
 
