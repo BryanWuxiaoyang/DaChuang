@@ -19,7 +19,7 @@ stkcd=np.load('stkcd.npy').tolist()
 #records=[]
 #遍历页码
 start_page=1#int(sys.argv[1])
-end_page=60#int(sys.argv[2])
+end_page=40#int(sys.argv[2])
 #就是'http://guba.eastmoney.com/list,zssh000001_{}.html' 里面zssh000001部分，可以用其他代替
 
 
