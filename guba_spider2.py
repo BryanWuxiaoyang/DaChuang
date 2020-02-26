@@ -37,10 +37,9 @@ for i in list(range(0,len(stkcd),100)):#500只保存一次
             try:
                 time.sleep(1)
                 print('cur page: ',page) 
-                #proxy=random.choice(proxy_list)
+                proxy=random.choice(proxy_list)
                 
-    
-                r=s.get(base_url.format(page))#,proxies=proxy)
+                r=s.get(base_url.format(page),proxies=proxy)
                 article_list = BeautifulSoup(r.content, 'lxml').find_all(class_='articleh normal_post')
                 item_count=0
                 #print('item_count: ')
