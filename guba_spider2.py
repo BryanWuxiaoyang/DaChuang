@@ -13,7 +13,7 @@ stkcd=np.load('stkcd.npy').tolist()
 #stkcd=stkcd[:1]
 
 start_page=1#int(sys.argv[1])
-end_page=36#int(sys.argv[2])
+end_page=40#int(sys.argv[2])
 
 proxy_list=[{"http":'http://60.217.64.237:31923'},{'http':'http://115.223.120.254:8010'},
 {'http':'http://117.88.177.174:3000'},{"https":'https://117.88.176.63:3000'},{'https':'https://49.65.160.69:18118'},
@@ -21,8 +21,7 @@ proxy_list=[{"http":'http://60.217.64.237:31923'},{'http':'http://115.223.120.25
 {'https':'https://117.88.176.186:3000'},{'http':'http://222.95.144.183:3000'},{'http':'http://121.237.148.16:3000'}]
 
 
-s=requests.session()
-s.keep_alive=False
+
 k=1
 for i in list(range(0,len(stkcd),50)):#500只保存一次
     
@@ -37,18 +36,23 @@ for i in list(range(0,len(stkcd),50)):#500只保存一次
             try:
                 time.sleep(1)
                 print('cur page: ',page) 
-                proxy=random.choice(proxy_list)
-                
-                r=s.get(base_url.format(page),proxies=proxy)
+                #proxy=random.choice(proxy_list)
+                s=requests.session()
+                s.keep_alive=False
+
+                r=s.get(base_url.format(page))#,proxies=proxy)
                 article_list = BeautifulSoup(r.content, 'lxml').find_all(class_='articleh normal_post')
                 item_count=0
                 #print('item_count: ')
+
                 for item in article_list:
                     try:
-                        time.sleep(0.5)
+                        #time.sleep(0.5)
                         reads=item.find_all('span',class_='l1 a1')[0].get_text()
                         href='http://guba.eastmoney.com'+item.find_all('span',class_='l3 a3')[0].a['href']
-                        detail=BeautifulSoup(requests.get(href).content, "lxml")
+
+                        detail=BeautifulSoup(s.get(href).content, "lxml")
+
                         title=detail.find_all('div',id='zwconttbt')[0].get_text()
                         data=json.loads(detail.find_all(class_='data')[0]['data-json'])
                         user_id=data['user_id']
