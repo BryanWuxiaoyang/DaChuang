@@ -24,11 +24,11 @@ proxy_list=[{"http":'http://60.217.64.237:31923'},{'http':'http://115.223.120.25
 s=requests.session()
 s.keep_alive=False
 k=1
-for i in list(range(0,len(stkcd),100)):#500只保存一次
+for i in list(range(0,len(stkcd),50)):#500只保存一次
     
     df=pd.DataFrame()
     m=1
-    for this_id in stkcd[i:i+100]:
+    for this_id in stkcd[i:i+50]:
         base_url='http://guba.eastmoney.com/list,'+this_id+'_{}.html'
         print('num of stocks: ',m)
         m+=1
