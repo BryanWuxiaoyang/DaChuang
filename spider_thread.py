@@ -10,13 +10,13 @@ import numpy as np
 import pandas as pd
 import random
 import threading
-threading.TIMEOUT_MAX=5
+#threading.TIMEOUT_MAX=5
 from queue import Queue
 stkcd=np.load('stkcd.npy').tolist()
 #stkcd=stkcd[:1]
 
 start_page=1#int(sys.argv[1])
-end_page=41#int(sys.argv[2])
+end_page=40#int(sys.argv[2])
 
 proxy_list=[{"http":'http://60.217.64.237:31923'},{'http':'http://115.223.120.254:8010'},
 {'http':'http://117.88.177.174:3000'},{"https":'https://117.88.176.63:3000'},{'https':'https://49.65.160.69:18118'},
@@ -31,15 +31,16 @@ def get_detail(detail_list,dct_queue,i):
         try:
             #print('thread {} working'.format(i))
            
-            time.sleep(0.1)
+            time.sleep(0.3)
             item=detail_list.get()
 
             reads=item.find_all('span',class_='l1 a1')[0].get_text()
             href='http://guba.eastmoney.com'+item.find_all('span',class_='l3 a3')[0].a['href']
 
-            detail=BeautifulSoup(s.get(href).content, "lxml")
+            detail=BeautifulSoup(s.get(href,headers={'Connection':'close'}).content, "lxml")#在请求报头里面写明关闭链接
 
-            title=detail.find_all('div',id='zwconttbt')[0].get_text().strip()
+            title=detail.find_all('div', class_='stockcodec .xeditor')[0].get_text().strip()
+            #print(title)
 
             data=json.loads(detail.find_all(class_='data')[0]['data-json'])
             user_id=data['user_id']
@@ -69,7 +70,7 @@ def get_detail(detail_list,dct_queue,i):
 
 
 k=1
-step=50
+step=20
 for i in list(range(0,len(stkcd),step)):
     
     df=pd.DataFrame()
@@ -83,11 +84,13 @@ for i in list(range(0,len(stkcd),step)):
             try:
                 time.sleep(1)
                 print('cur page: ',page) 
+            
                 #proxy=random.choice(proxy_list)
-                s=requests.session()#
-                s.keep_alive=False#防止维持的链接过多
 
-                r=s.get(base_url.format(page))#,proxies=proxy)
+                s=requests.session()
+                s.keep_alive=False
+
+                r=s.get(base_url.format(page),headers={'Connection':'close'})#,proxies=proxy)
                 article_list = BeautifulSoup(r.content, 'lxml').find_all(class_='articleh normal_post')
                 item_count=0
                 #print('item_count: ')
@@ -97,8 +100,11 @@ for i in list(range(0,len(stkcd),step)):
                     detail_url_queue.put(item)
 
                 dct_queue=Queue(maxsize=200)
+                
+                #设置线程数
+                num_of_threads=3
 
-                num_of_threads=10
+
                 ths=[]#初始化线程
                 for i in range(num_of_threads):
                     th=threading.Thread(target=get_detail,args=(detail_url_queue,dct_queue,i))
@@ -109,7 +115,7 @@ for i in list(range(0,len(stkcd),step)):
                     #ths[i].setDaemon(True)
                     ths[i].start()
                 for i in range(num_of_threads):
-                    ths[i].join(5)
+                    ths[i].join(5)#设置timeout
 
                 
                 while(not dct_queue.empty()):
