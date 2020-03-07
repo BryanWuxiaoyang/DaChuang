@@ -30,7 +30,6 @@ def get_detail(detail_list,dct_queue,i):
     while(not detail_list.empty()):
         try:
             #print('thread {} working'.format(i))
-           
             time.sleep(0.3)
             item=detail_list.get()
 
@@ -40,7 +39,7 @@ def get_detail(detail_list,dct_queue,i):
             detail=BeautifulSoup(s.get(href,headers={'Connection':'close'}).content, "lxml")#在请求报头里面写明关闭链接
 
             title=detail.find_all('div', class_='stockcodec .xeditor')[0].get_text().strip()
-            comment_num=detail.find_all('span', class_='comment_num')[0].get_text().strip(['（','）'])
+            comment_num=detail.find_all('span', class_='comment_num')[0].get_text().strip("（）")
             #print(title)
 
             data=json.loads(detail.find_all(class_='data')[0]['data-json'])
@@ -60,21 +59,18 @@ def get_detail(detail_list,dct_queue,i):
             record['user_id']=user_id                       
             record['star']=star
             record['content']=title
-            record['comment_count']=comment_num
+            #record['comment_count']=comment_num
             
             dct_queue.put(record)
-            
-
         except Exception as err:
-            #pass
-            print(err)
+            pass
+            #print(err)
 
 
 
 k=1
-step=20
+step=10
 for i in list(range(0,len(stkcd),step)):
-    
     df=pd.DataFrame()
     m=1
     for this_id in stkcd[i:i+step]:
@@ -97,11 +93,11 @@ for i in list(range(0,len(stkcd),step)):
                 item_count=0
                 #print('item_count: ')
 
-                detail_url_queue = Queue(maxsize=200)
+                detail_url_queue = Queue(maxsize=200)#每一页要爬取
                 for item in article_list:
                     detail_url_queue.put(item)
 
-                dct_queue=Queue(maxsize=200)
+                dct_queue=Queue(maxsize=200)#每一页已爬取
                 
                 #设置线程数
                 num_of_threads=3
@@ -124,10 +120,14 @@ for i in list(range(0,len(stkcd),step)):
                     r=dct_queue.get()
                     df=df.append(pd.DataFrame(r,index=[this_id]))
                     
+                del detail_url_queue
+                del dct_queue
+                    
             except Exception as err:
-                #pass
-                print(err)
+                pass
+                #print(err)
     df.to_csv('./comment'+str(k)+'.csv' )
+    del df
     k+=1   
 
 
