@@ -40,7 +40,6 @@ def get_detail(detail_list,dct_queue,i):
             detail=BeautifulSoup(s.get(href,headers={'Connection':'close'}).content, "lxml")#在请求报头里面写明关闭链接
 
             title=detail.find_all('div', class_='stockcodec .xeditor')[0].get_text().strip()
-            comment_num=detail.find_all('span', class_='comment_num')[0].get_text().strip(['（','）'])
             #print(title)
 
             data=json.loads(detail.find_all(class_='data')[0]['data-json'])
@@ -60,7 +59,6 @@ def get_detail(detail_list,dct_queue,i):
             record['user_id']=user_id                       
             record['star']=star
             record['content']=title
-            record['comment_count']=comment_num
             
             dct_queue.put(record)
             
