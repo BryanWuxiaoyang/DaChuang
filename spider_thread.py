@@ -66,23 +66,16 @@ def get_detail(detail_list,dct_queue,i):
             
 
         except Exception as err:
-            pass
-            #print(err)
+            #pass
+            print(err)
+
 
 
 k=1
 step=20
-df=pd.DataFrame()
-
-s=requests.session()
-s.keep_alive=False
-
-detail_url_queue = Queue(maxsize=200)
-
-dct_queue=Queue(maxsize=200)
-
 for i in list(range(0,len(stkcd),step)):
     
+    df=pd.DataFrame()
     m=1
     for this_id in stkcd[i:i+step]:
         base_url='http://guba.eastmoney.com/list,'+this_id+'_{}.html'
@@ -96,16 +89,19 @@ for i in list(range(0,len(stkcd),step)):
             
                 #proxy=random.choice(proxy_list)
 
-            
+                s=requests.session()
+                s.keep_alive=False
+
                 r=s.get(base_url.format(page),headers={'Connection':'close'})#,proxies=proxy)
                 article_list = BeautifulSoup(r.content, 'lxml').find_all(class_='articleh normal_post')
                 item_count=0
                 #print('item_count: ')
 
-                
+                detail_url_queue = Queue(maxsize=200)
                 for item in article_list:
                     detail_url_queue.put(item)
 
+                dct_queue=Queue(maxsize=200)
                 
                 #设置线程数
                 num_of_threads=3
@@ -125,16 +121,13 @@ for i in list(range(0,len(stkcd),step)):
 
                 
                 while(not dct_queue.empty()):
-                    df=df.append(pd.DataFrame(dct_queue.get(),index=[this_id]))
+                    r=dct_queue.get()
+                    df=df.append(pd.DataFrame(r,index=[this_id]))
                     
-                detail_url_queue.queue.clear()
-                dct_queue.queue.clear()
-
             except Exception as err:
-                pass
-                #print(err)
+                #pass
+                print(err)
     df.to_csv('./comment'+str(k)+'.csv' )
-    df.drop(df.index,inplace=True)
     k+=1   
 
 
