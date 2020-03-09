@@ -13,7 +13,7 @@ import threading
 #threading.TIMEOUT_MAX=5
 from queue import Queue
 stkcd=np.load('stkcd.npy').tolist()
-#stkcd=stkcd[:1]
+#stkcd=stkcd[200:]
 
 start_page=1#int(sys.argv[1])
 end_page=40#int(sys.argv[2])
@@ -34,14 +34,18 @@ def get_detail(detail_list,dct_queue,i):
             item=detail_list.get()
 
             reads=item.find_all('span',class_='l1 a1')[0].get_text()
+            comments=item.find_all('span',class_='l2 a2')[0].get_text()
+
             href='http://guba.eastmoney.com'+item.find_all('span',class_='l3 a3')[0].a['href']
 
             detail=BeautifulSoup(s.get(href,headers={'Connection':'close'}).content, "lxml")#在请求报头里面写明关闭链接
 
             title=detail.find_all('div', class_='stockcodec .xeditor')[0].get_text().strip()
-            comment_num=detail.find_all('span', class_='comment_num')[0].get_text().strip("（）")
-            #print(title)
 
+            if len(title)>300:
+            	continue
+
+            
             data=json.loads(detail.find_all(class_='data')[0]['data-json'])
             user_id=data['user_id']
             if user_id=='':
@@ -59,12 +63,12 @@ def get_detail(detail_list,dct_queue,i):
             record['user_id']=user_id                       
             record['star']=star
             record['content']=title
-            #record['comment_count']=comment_num
+            record['comment_count']=comments
             
             dct_queue.put(record)
         except Exception as err:
-            pass
-            #print(err)
+            #pass
+            print(err)
 
 
 
@@ -120,12 +124,13 @@ for i in list(range(0,len(stkcd),step)):
                     r=dct_queue.get()
                     df=df.append(pd.DataFrame(r,index=[this_id]))
                     
-                del detail_url_queue
-                del dct_queue
+                print('df len: ',len(df))    
+                detail_url_queue.queue.clear()
+                dct_queue.queue.clear()
                     
             except Exception as err:
-                pass
-                #print(err)
+                #pass
+                print(err)
     df.to_csv('./comment'+str(k)+'.csv' )
     del df
     k+=1   
