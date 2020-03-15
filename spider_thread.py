@@ -13,7 +13,7 @@ import threading
 #threading.TIMEOUT_MAX=5
 from queue import Queue
 stkcd=np.load('stkcd.npy').tolist()
-#stkcd=stkcd[200:]
+stkcd=stkcd[10:]
 
 start_page=1#int(sys.argv[1])
 end_page=40#int(sys.argv[2])
@@ -72,8 +72,11 @@ def get_detail(detail_list,dct_queue,i):
 
 
 
-k=1
+k=2
 step=10
+detail_url_queue = Queue(maxsize=200)#每一页要爬取
+dct_queue=Queue(maxsize=200)#每一页已爬取
+
 for i in list(range(0,len(stkcd),step)):
     df=pd.DataFrame()
     m=1
@@ -97,11 +100,11 @@ for i in list(range(0,len(stkcd),step)):
                 item_count=0
                 #print('item_count: ')
 
-                detail_url_queue = Queue(maxsize=200)#每一页要爬取
+                
                 for item in article_list:
                     detail_url_queue.put(item)
 
-                dct_queue=Queue(maxsize=200)#每一页已爬取
+                
                 
                 #设置线程数
                 num_of_threads=3
@@ -125,6 +128,7 @@ for i in list(range(0,len(stkcd),step)):
                     df=df.append(pd.DataFrame(r,index=[this_id]))
                     
                 print('df len: ',len(df))    
+                
                 detail_url_queue.queue.clear()
                 dct_queue.queue.clear()
                     
